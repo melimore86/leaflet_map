@@ -1,0 +1,446 @@
+---
+title: "Oyster Restoration Project Lab Results"
+author: "Mel Moreno"
+date: "Febuary 14, 2018"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+## Plotting with base R
+
+For simple graphs populated quickly, it could be beneficial to use base R. Base R means, not using additional packages, to create plots in R. The following plots, will only use commands and arguments that are in every installation of R. Advantages of using base R plotting is no package installation to use, and probably most people will be familiar with the code. The following will allow for the lab quality results that are retrieved monthly, to be graphed in base R.
+
+```{r packages, include=FALSE, eval=TRUE}
+library(grid)
+library(gridExtra)
+library(lattice)
+library(marelac)
+library(scales)
+library(zoo)
+```
+
+##Retrieving data
+
+The code below is to import data from flat files, aka csv. files, and etc. More code will be written/changed to retrieve the data from a working MYSQL database. Change the script to your working directory. Allow for `header=TRUE`, which informs R that the first row are column headings.
+
+```{r labresultsfalse, include=FALSE, eval=TRUE}
+setwd("C:/Users/melimore86/Desktop")
+labresults <- read.csv("cedarkeylabresults.csv", header= T)
+```
+
+```{r labresultstrue, include=TRUE, eval=FALSE}
+setwd("C:/Users/yourdirectory/Desktop")
+labresults <- read.csv("cedarkeylabresults.csv", header= T)
+```
+
+##Renaming Columns
+
+Just to make plotting somewhat easier, we can rename the columns in our data.
+
+```{r columns, include=TRUE}
+
+colnames(labresults) <- c("County", "Name", "Date", "Month", "Day","Year","Station", "Phosphorus", "Nitrogen", "Chlorophyll", "Secchi", "Secchi 2", "Color", "SpecificConductancemicro", "SpecificConductancemilli")
+```
+
+##Changing data and time to an `as.Date`
+
+The date and time are usually an issue with data. The date needs to be transformed into a readable format for base R. 
+
+```{r asdate, include=TRUE}
+labresults$newDate <- as.Date(labresults$Date, origin= "1899-12-30")
+
+labresults$newDate <- as.Date(labresults$Date, "%m/%d/%Y")
+```
+
+##Combining both conductivities
+
+The lab results come with two types of conductivities, which don't seem to equate to each other. In this tutorial, they are combined and the outliers are removed. Normally, 1 millisiemens [mS] = 1000 microsiemens [µS, uS], but looking at the original data the *1000 difference doesn't translate between the columns. 
+
+```{r conduct, include=TRUE}
+
+labresults$allconduct<-NA
+
+labresults$allconduct<-paste(labresults$SpecificConductancemilli,labresults$SpecificConductancemicro)
+
+labresults$allconduct<-as.numeric(gsub('NA','',labresults$allconduct))
+
+```
+
+#Subsetting to individual sites
+
+To plot the sites separately, the data is divided by `Station`. The argument `subset` is used.
+
+```{r subset, include=TRUE }
+site1<-subset(labresults,Station=="1")
+site2<-subset(labresults,Station=="2")
+site3<-subset(labresults,Station=="3")
+site4<-subset(labresults,Station=="4")
+site5<-subset(labresults,Station=="5")
+site6<-subset(labresults,Station=="6")
+```
+##River Discharge data
+
+The plots will require river discharge data, which will be retrieved the `waterData` and `hydroTSM` packages. The station closest to the Lone Cabbage sensors in Cedar Key is '02323500'. Sometimes all of the river discharge data is not available, and some gaps will be present. Run the script the following week, to see if the data has been added to the package. This should close up any gaps in the continuous river discharge data.
+
+```{r riverdischarge, include=TRUE, warning=FALSE, message=FALSE,}
+# River Disharge
+library("waterData")
+library("hydroTSM")
+
+#station to analyze
+station = '02323500'   
+#get site name to use in plot titles and such
+stinfo  = siteInfo(station)
+
+#read entire time series
+dis   = importDVs(staid=station,code='00060',stat='00003', sdate= "1950-01-01")
+
+#get some date components
+dis$year    = as.numeric(strftime(dis$dates,format="%Y"))
+dis$month   = as.numeric(strftime(dis$dates,format="%m")) 
+
+#make dataset from epochs, 
+disE  = dis[dis$dates>='1950-01-01' & dis$dates<='2017-10-01',]  
+
+#get monthly sum, mean, sd, and var
+#discharge
+disE.mo  = aggregate(val~month+year,data=disE,FUN = function(x) c(mean(x,na.rm=T),sd(x,na.rm=T),var(x,na.rm=T),sum(x)))
+disE.mo  = do.call('data.frame',disE.mo)
+names(disE.mo)[3:6] = c('avg','sd','var','sumflow') 
+disE.mo$yrmo = disE.mo$year+(disE.mo$month-0.5)/12       
+
+
+#get yearly mean, sd, and var
+#discharge
+disE.yr  = aggregate(val~year,data=disE,FUN = function(x) c(mean(x,na.rm=T),sd(x,na.rm=T),var(x,na.rm=T)))
+disE.yr  = do.call('data.frame',disE.yr)
+names(disE.yr)[2:4] = c('avg','sd','var')                      
+
+
+#make some time series objects
+disE.zoo    = zoo(disE$val,disE$dates)  
+
+disE.mo.ts  = ts(disE.mo$avg,start=c(1950,1),end=c(2017,10),frequency=12)
+disE.mo.sum.ts  = ts(disE.mo$sumflow,start=c(1950,1),end=c(2017,10),frequency=12)
+disE.yr.ts  = ts(disE.yr$avg,start=1950,end=2017,frequency=1)
+
+#Naming columns, using the Diver sensors, collects date, pressure, temp, conductivity
+colnames(dis) <- c("StaID", "Values", "Date", "QualCode", "Year", "Month")
+
+#Changing the format of the dates to be able to plot against time
+dis$newDate <- as.POSIXct(as.Date(dis$Date,origin= "1899-12-30"))
+
+
+```
+
+##Plotting
+
+To create the river discharge, the x-axis and y-axis repetitions to fill in the area under the curve. The river discharge is plotted with the different lab results variables to see if there is any relation to mean daily river discharge.
+
+```{r xy}
+xx <- c(dis$newDate, rev(dis$newDate))
+yy <- c(rep(0, nrow(dis)), rev(dis$Values))
+```
+
+##Phosphorus
+The next code will be deciphered for the first plot, but not for the rest of the plots. Phosphorus is in units µg/L.
+
+```{r phos, warning=FALSE, message=FALSE,fig.width=10,fig.height=10}
+par(mfrow=c(3,2)) #this code specifies for 3 rows and 2 columns
+plot(site6$newDate, site6$Phosphorus, pch=19, ylab="Phosphorus (µg/L)", xlab="Date", main="Site 6 Phosphorus", ylim=c(0,100),format="%m-%y",las=2, cex=1.5) #the `plot` commands requires x and y-axis variables which are dates and phosphorus respectively, `pch` changes the shape of the point, `ylab` is the y-axis label, `xlab` is the x-axis label, `main` will specify the main plot title, `ylim` will create a min and max for the main y-axis, `format` will convert the date into a numeric format to be mm-yy, `las` rotates the x-axis ticks and labels to be vertical, `cex` changes the size of the points
+par(new=TRUE) #this adds a secondary y-axis to the plot
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2)) #this new plot adds the river discharge with no axes to the already existing plot, the `xlim` is regulated by date, since the river discharge data starts in the 1960s until 2017, `type=l` makes the data plotted in a line, the `col` makes a blue transparent line which is in transparency 20% 
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA) #the `polygon` function recalls the `xx` and `yy` that was created previous, the `col` is the same color as the previous plot, the border was also removed for aesthetic purposes
+axis(4, at=pretty(c(0,35000)), col='black') #this is the secondary axis which has a different limit than the primary axis, normally it is around 35,000 but can range up to 55,000 in previous years
+mtext("River Discharge cf/s", side = 4,cex=0.6) #the code adds text for the secondary y-axis 
+
+plot(site1$newDate, site1$Phosphorus, pch=19, ylab="Phosphorus (µg/L)", xlab="Date", main="Site 6 Phosphorus", ylim=c(0,100),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site5$newDate, site5$Phosphorus, pch=19, ylab="Phosphorus (µg/L)", xlab="Date", main="Site 6 Phosphorus", ylim=c(0,100),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site2$newDate, site2$Phosphorus, pch=19, ylab="Phosphorus (µg/L)", xlab="Date", main="Site 6 Phosphorus", ylim=c(0,100),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site4$newDate, site4$Phosphorus, pch=19, ylab="Phosphorus (µg/L)", xlab="Date", main="Site 6 Phosphorus", ylim=c(0,100),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site3$newDate, site3$Phosphorus, pch=19, ylab="Phosphorus (µg/L)", xlab="Date", main="Site 6 Phosphorus", ylim=c(0,100),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+```
+
+##Nitrogen
+For every variable measured, there will be a a y-axis limit. The next plots will be for nitrogen in the units µg/L.
+
+
+```{r nitrogen, warning=FALSE, message=FALSE,fig.width=10,fig.height=10}
+par(mfrow=c(3,2))
+plot(site6$newDate, site6$Nitrogen, pch=19, ylab="Nitrogen (µg/L)", xlab="Date", main="Site 6 Nitrogen", ylim=c(0,1300),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site1$newDate, site1$Nitrogen, pch=19, ylab="Nitrogen (µg/L)", xlab="Date", main="Site 1 Nitrogen", ylim=c(0,1300),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site5$newDate, site5$Nitrogen, pch=19, ylab="Nitrogen (µg/L)", xlab="Date", main="Site 5 Nitrogen", ylim=c(0,1300),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site2$newDate, site2$Nitrogen, pch=19, ylab="Nitrogen (µg/L)", xlab="Date", main="Site 2 Nitrogen", ylim=c(0,1300),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site4$newDate, site4$Nitrogen, pch=19, ylab="Nitrogen (µg/L)", xlab="Date", main="Site 4 Nitrogen", ylim=c(0,1300),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site3$newDate, site3$Nitrogen, pch=19, ylab="Nitrogen (µg/L)", xlab="Date", main="Site 3 Nitrogen", ylim=c(0,1300),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+```
+
+##Chlorophyll
+Chlorophyll is measured in unit µg/L. 
+
+```{r chloro, warning=FALSE, message=FALSE,fig.width=10,fig.height=10}
+par(mfrow=c(3,2))
+plot(site6$newDate, site6$Chlorophyll, pch=19, ylab="Chlorophyll (µg/L)", xlab="Date", main="Site 6 Chlorophyll", ylim=c(0,65),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site1$newDate, site1$Chlorophyll, pch=19, ylab="Chlorophyll (µg/L)", xlab="Date", main="Site 1 Chlorophyll", ylim=c(0,65),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site5$newDate, site5$Chlorophyll, pch=19, ylab="Chlorophyll (µg/L)", xlab="Date", main="Site 5 Chlorophyll", ylim=c(0,65),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site2$newDate, site2$Chlorophyll, pch=19, ylab="Chlorophyll (µg/L)", xlab="Date", main="Site 2 Chlorophyll", ylim=c(0,65),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site4$newDate, site4$Chlorophyll, pch=19, ylab="Chlorophyll (µg/L)", xlab="Date", main="Site 4 Chlorophyll", ylim=c(0,65),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site3$newDate, site3$Chlorophyll, pch=19, ylab="Chlorophyll (µg/L)", xlab="Date", main="Site 3 Chlorophyll", ylim=c(0,65),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+```
+
+##Secchi
+Secchi is measured in units of feet (ft).
+
+```{r secchi, warning=FALSE, message=FALSE, fig.width=10,fig.height=10}
+par(mfrow=c(3,2))
+plot(site6$newDate, site6$Secchi, pch=19, ylab="Secchi (ft)", xlab="Date", main="Site 6 Secchi", ylim=c(0,5),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site1$newDate, site1$Secchi, pch=19, ylab="Secchi (ft)", xlab="Date", main="Site 1 Secchi", ylim=c(0,5),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site5$newDate, site5$Secchi, pch=19, ylab="Secchi (ft)", xlab="Date", main="Site 5 Secchi", ylim=c(0,5),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site2$newDate, site2$Secchi, pch=19, ylab="Secchi (ft)", xlab="Date", main="Site 2 Secchi", ylim=c(0,5),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site4$newDate, site4$Secchi, pch=19, ylab="Secchi (ft)", xlab="Date", main="Site 4 Secchi", ylim=c(0,5),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site3$newDate, site3$Secchi, pch=19, ylab="Secchi (ft)", xlab="Date", main="Site 3 Secchi", ylim=c(0,5),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+```
+
+##Color
+Color is measured in units Pt-Co.
+
+```{r color, warning=FALSE, message=FALSE,fig.width=10,fig.height=10}
+par(mfrow=c(3,2))
+plot(site6$newDate, site6$Color, pch=19, ylab="Color (Pt-Co Units)", xlab="Date", main="Site 6 Color", ylim=c(0,110),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site1$newDate, site1$Color, pch=19, ylab="Color (Pt-Co Units)", xlab="Date", main="Site 1 Color", ylim=c(0,110),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site5$newDate, site5$Color, pch=19, ylab="Color (Pt-Co Units)", xlab="Date", main="Site 5 Color", ylim=c(0,110),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site2$newDate, site2$Color, pch=19, ylab="Color (Pt-Co Units)", xlab="Date", main="Site 2 Color", ylim=c(0,110),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site4$newDate, site4$Color, pch=19, ylab="Color (Pt-Co Units)", xlab="Date", main="Site 4 Color", ylim=c(0,110),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site3$newDate, site3$Color, pch=19, ylab="Color (Pt-Co Units)", xlab="Date", main="Site 3 Color", ylim=c(0,110),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+```
+
+##Conductivity
+
+Conductivity is measured in mS/cm.
+
+```{r condplot, warning=FALSE, message=FALSE,fig.width=10,fig.height=10}
+par(mfrow=c(3,2))
+plot(site6$newDate, site6$allconduct, pch=19, ylab="Specific Conductance (mS/cm))", xlab="Date", main="Site 6 Specific Conductance", ylim=c(0,40),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+plot(site1$newDate, site1$allconduct, pch=19, ylab="Specific Conductance (mS/cm))", xlab="Date", main="Site 1 Specific Conductance", ylim=c(0,40),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+
+plot(site5$newDate, site5$allconduct, pch=19, ylab="Specific Conductance (mS/cm))", xlab="Date", main="Site 5 Specific Conductance", ylim=c(0,40),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+
+plot(site2$newDate, site2$allconduct, pch=19, ylab="Specific Conductance (mS/cm))", xlab="Date", main="Site 2 Specific Conductance", ylim=c(0,40),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+
+plot(site4$newDate, site4$allconduct, pch=19, ylab="Specific Conductance (mS/cm))", xlab="Date", main="Site 4 Specific Conductance", ylim=c(0,40),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+
+
+plot(site3$newDate, site3$allconduct, pch=19, ylab="Specific Conductance (mS/cm))", xlab="Date", main="Site 6 Specific Conductance", ylim=c(0,40),format="%m-%y",las=2, cex=1.5)
+par(new=TRUE)
+plot(x=dis$newDate, y=dis$Values, ylab="", lwd= 2, xlab= "Date", main= "",ylim=c(0,35000), axes=FALSE,xlim = c(as.POSIXct("2017-01-01"),as.POSIXct("2017-12-31")), type="l",col=rgb(0,0,1, 0.2))
+polygon(xx,yy,col=rgb(0,0,1, 0.2), border=NA)
+axis(4, at=pretty(c(0,35000)), col='black')
+mtext("River Discharge cf/s", side = 4,cex=0.6)
+```
+
+
+
+
