@@ -1,0 +1,76 @@
+library(leaflet)
+library(rgdal)
+
+propreef <- readOGR(dsn=path.expand("C:/Users/melimore86/Desktop/Mapping"), layer = "LC_reef_elements")
+
+propreef2 <- spTransform(propreef, CRS("+init=epsg:4326"))
+
+oysterbeds <- readOGR(dsn=path.expand("C:/Users/melimore86/Desktop/Mapping/Mapping Oysters"), layer = "Oyster_Beds_in_Florida")
+
+oysterbeds2<- spTransform(oysterbeds, CRS("+init=epsg:4326"))
+
+
+setwd("T:/Oyster Project/Oyster_historic/Oyster_Shapes")
+
+oysterbeds2010 <- readOGR(dsn=path.expand("T:/Oyster Project/Oyster_historic/Oyster_Shapes"), layer = "HS_2010")
+
+
+leaflet() %>% addProviderTiles("OpenStreetMap", group = "OpenStreetMap") %>% addProviderTiles("CartoDB.Positron",group = "CartoDB Positron") %>% addProviderTiles("Esri.WorldImagery", group = "Esri WorldImagery") %>% addProviderTiles("OpenTopoMap", group = "OpenTopoMap") %>% setView(-83.08, 29.25, 13)%>%addPolygons(data = propreef,stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, group= "Proposed Reef") %>%addPolygons(data = histreef2,stroke = FALSE, fillOpacity = 0.5, smoothFactor = 0.5, group= "Historic Reef") %>%
+  addMarkers(
+    lng = -83.115630028769374, lat = 29.266499960795045,
+    label = "Site 1",
+    labelOptions = labelOptions(noHide = F),
+    popup= '<a href = "http://rpubs.com/melimore86/site1measurements"> Measurements for Site 1 </a>') %>%
+  addMarkers(
+    lng = -83.095889976248145, lat = 29.245640002191067,
+    label = "Site 2",
+    labelOptions = labelOptions(noHide = F),
+    popup= '<a href = "http://rpubs.com/melimore86/site2measurements"> Measurements for Site 2 </a>') %>%
+  addMarkers(
+    lng = -83.090120041742921, lat = 29.231049958616495,
+    label = "Site 3",
+    labelOptions = labelOptions(noHide = F),
+    popup= '<a href = "http://rpubs.com/melimore86/site3measurements"> Measurements for Site 3 </a>') %>%
+  addMarkers(
+    lng = -83.092115018516779, lat = 29.230171032249928,
+    label = "Site 4",
+    labelOptions = labelOptions(noHide = F),
+    popup= '<a href = "http://rpubs.com/melimore86/site4measurements"> Measurements for Site 4 </a>') %>%
+  addMarkers(
+    lng = -83.10149998404085, lat = 29.246092038229108,
+    label = "Site 5",
+    labelOptions = labelOptions(noHide = F),
+    popup= '<a href = "http://rpubs.com/melimore86/site5measurements"> Measurements for Site 5 </a>') %>%
+  addMarkers(
+    lng = -83.118119034916162, lat = 29.265770986676216,
+    label = "Site 6",
+    labelOptions = labelOptions(noHide = F),
+    popup= '<a href = "http://rpubs.com/melimore86/site6measurements"> Measurements for Site 6 </a>')%>%
+  addMarkers(
+    lng = -83.09822, lat = 29.26773,
+    label = "Site 7",
+    labelOptions = labelOptions(noHide = F),
+    popup= '<a href = "http://rpubs.com/melimore86/site7measurements"> Measurements for Site 7 </a>') %>%
+  addMarkers(
+    lng = -83.08027, lat = 29.25743,
+    label = "Site 8",
+    labelOptions = labelOptions(noHide = F),
+    popup= '<a href = "http://rpubs.com/melimore86/site8measurements"> Measurements for Site 8 </a>') %>%
+  addMarkers(
+    lng = -83.08271, lat = 29.23215,
+    label = "Site 9",
+    labelOptions = labelOptions(noHide = F),
+    popup= '<a href = "http://rpubs.com/melimore86/site9measurements"> Measurements for Site 9 </a>')%>%
+  addProviderTiles("OpenWeatherMap.Clouds", group = "clouds2", options = tileOptions(opacity = 0.6)) %>%
+  addTiles(urlTemplate = "http://{s}.tile.openweathermap.org/map/temp/{z}/{x}/{y}.png", attribution = "Weather data © OpenWeatherMap", group = "temp", options = tileOptions(opacity = 0.6)) %>% 
+  addTiles(urlTemplate = "http://{s}.tile.openweathermap.org/map/precipitation/{z}/{x}/{y}.png", attribution = "Weather data © OpenWeatherMap", group = "precipitation", 
+           options = tileOptions(opacity = 0.6)) %>% addTiles(urlTemplate = "http://{s}.tile.openweathermap.org/map/snow/{z}/{x}/{y}.png", attribution = "Weather data © OpenWeatherMap", group = "snow", options = tileOptions(opacity = 0.6)) %>% 
+  addTiles(urlTemplate = "http://{s}.tile.openweathermap.org/map/wind/{z}/{x}/{y}.png", 
+           attribution = "Weather data © OpenWeatherMap", group = "wind", 
+           options = tileOptions(opacity = 0.6)) %>% # draw lines above
+  addProviderTiles("Stamen.TonerLines", group = "Stamen Toner Lines") %>% 
+  
+  addLayersControl(baseGroups = c("OpenStreetMap", "OpenTopoMap", "CartoDB Positron", 
+                                  "Esri WorldImagery", "none"), overlayGroups = c("Proposed Reef", "Historic Reef","clouds2", "temp","precipitation", "snow", "wind", "Stamen Toner Lines"), options = layersControlOptions(collapsed = TRUE)) %>% 
+  hideGroup(c("temp", "precipitation", "snow", "wind"))
+

@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/347736/145189bbae474ec086f64d0c62d05af0
+bundleId: https://api.rpubs.com/api/v1/document/347736/145189bbae474ec086f64d0c62d05af0
+url: http://rpubs.com/melimore86/347736
+when: 1518033370.94827
