@@ -1,0 +1,33 @@
+---
+title: "data.download"
+author: "Melissa Moreno"
+date: "March 13, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+title: "Sensor Measurement Download"
+
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, include=False, warning=False, message=FALSE}
+
+setwd("C:/Users/melimore86/Desktop/Deployment/Lone Cabbage WQ Data/LC_WQ1/CSV")
+LC_WQ1 <- read.csv("LC_WQ1_All_Days_R.csv", header= T)
+write.csv2(LC_WQ1, "./file.csv")
+
+library(magrittr)
+readLines("./file.csv") %>% 
+  paste0(collapse="\n") %>% 
+  openssl::base64_encode() -> encoded
+```
+
+[Download Sensor 1 Measurements](`r sprintf('data:text/csv;base64,%s', encoded)`)

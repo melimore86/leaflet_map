@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/385211/8b30664dd9bf4122a91bbc048f90c0bd
+bundleId: https://api.rpubs.com/api/v1/document/385211/8b30664dd9bf4122a91bbc048f90c0bd
+url: http://rpubs.com/oysterproject/385211
+when: 1525279061.80123

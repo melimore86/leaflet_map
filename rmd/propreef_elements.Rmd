@@ -1,0 +1,40 @@
+---
+output:
+  html_document:
+    fig_width: 10
+    fig_height: 8
+---
+  
+```{r r_packages, include=FALSE}
+library(leaflet)
+library(htmlwidgets)
+```
+
+```{r r_uploads,include= FALSE}
+library(rgdal)
+
+propreef <- readOGR(dsn=path.expand("T:/Oyster Project/mels_git/mapping/lc_project.gdb"), layer = "lc_reef_elements")
+
+PRO <- sp::CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0')
+
+propreef2<- sp::spTransform(propreef,PRO)
+```
+
+```{r r_map, include=FALSE}
+
+prop<-leaflet() %>%  addProviderTiles("Esri.WorldImagery", group = "Esri WorldImagery")  %>%
+addProviderTiles("OpenStreetMap.HOT", group = "OpenStreetMap.HOT")%>% 
+  addProviderTiles("Esri.NatGeoWorldMap", group = "Esri.NatGeoWorldMap") %>%
+  addPolygons(data = propreef2,stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5, group= "Proposed Reef", color="white", weight=10, label = paste("Element ID - ", propreef2$element_id), labelOptions = labelOptions(noHide = F, direction= "right"))%>%
+    setView(-83.10, 29.25, 15) %>%
+  addLayersControl(baseGroups = c("Esri WorldImagery","OpenStreetMap.HOT","Esri.NatGeoWorldMap"), overlayGroups = c("Proposed Reef"), options = layersControlOptions(collapsed = TRUE))
+
+```
+
+```{r intermap, echo=FALSE}
+prop
+saveWidget(prop, file="prop.html")
+```
+
+
+

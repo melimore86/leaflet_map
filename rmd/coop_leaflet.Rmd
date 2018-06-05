@@ -1,0 +1,135 @@
+---
+title: "Cooperator Locations"
+output:
+  html_document:
+    fig_width: 10
+    fig_height: 8
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("leaflet")
+library("rgdal")
+library("leaflet.extras")
+library("tidyverse")
+library("magrittr")
+```
+
+```{r coop_data, include= FALSE}
+
+propreef <- readOGR(dsn=path.expand("T:/Oyster Project/mels_git/mapping/shapefile"), layer = "LC_reef_elements")
+
+coop<-read.csv("csv/coop.csv", header= TRUE,sep=",")
+
+coop$Date <- as.Date( paste(coop$Year , coop$Month , coop$Day , sep = "." )  , format = "%Y.%m.%d" )
+
+
+fdacs<- coop[which(coop$Data_source=='FDACS'), ]
+fwc<- coop[which(coop$Data_source=='FWC'), ]
+frazier<-coop[which(coop$Data_source=='Frazier'), ]
+
+
+
+
+```
+
+```{r leaflet, include=FALSE}
+
+intermap<-leaflet() %>%  addProviderTiles("OpenStreetMap.HOT", group = "OpenStreetMap.HOT") %>% addProviderTiles("Esri.NatGeoWorldMap", group = "Esri.NatGeoWorldMap") %>%
+  
+  addProviderTiles("Esri.WorldImagery", group = "Esri WorldImagery")  %>% 
+  
+   addPolygons(data = propreef,stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5, group= "Proposed Reef", color="black")%>%
+  
+  addCircleMarkers(data=fwc, color= "#2F4F4F",
+  clusterOptions = markerClusterOptions(),radius = ~coop$Surface_sal,
+  popup = paste("Source:",fwc$Data_source,"<br>",
+                "Date:", fwc$Date, "<br>",
+                 "Surface Salinity", fwc$Surface_sal, "<br>",
+                           "Bottom Salinity:", fwc$Bottom_sal, "<br>",
+                           "Surface Temperature:", fwc$Surface_temp, "<br>",
+                           "Bottom Temperature:", fwc$Bottom_temp))%>%
+  
+  addCircleMarkers(data=fdacs, color= "#4B0082",
+  clusterOptions = markerClusterOptions(), radius = ~fdacs$Surface_sal,
+   popup = paste("Source:", fdacs$Data_source,"<br>",
+                "Date:", fdacs$Date, "<br>",
+                 "Surface Salinity", fdacs$Surface_sal, "<br>",
+                           "Bottom Salinity:", fdacs$Bottom_sal, "<br>",
+                           "Surface Temperature:", fdacs$Surface_temp, "<br>",
+                           "Bottom Temperature:", fdacs$Bottom_temp))%>%
+  
+  addCircleMarkers(data=frazier, color= "#800000",
+  clusterOptions = markerClusterOptions(),radius = ~frazier$Surface_sal,
+   popup = paste("Source:", frazier$Data_source,"<br>",
+                "Date:", frazier$Date,"<br>",
+                 "Surface Salinity", frazier$Surface_sal, "<br>",
+                           "Bottom Salinity:", frazier$Bottom_sal, "<br>",
+                           "Surface Temperature:", frazier$Surface_temp, "<br>",
+                           "Bottom Temperature:", frazier$Bottom_temp))%>%
+  setView(-83.10, 29.25, 14) %>%
+  
+  addProviderTiles("OpenWeatherMap.Clouds", group = "clouds2", options = tileOptions(opacity = 0.6)) %>%
+  addLayersControl(baseGroups = c("OpenStreetMap.HOT","Esri.NatGeoWorldMap","Esri WorldImagery"))
+
+```
+
+
+```{r, echo=FALSE}
+intermap
+```
+
+
+```{r, eval= FALSE, include= FALSE}
+
+coop$YM<- paste(coop$Year,"_" ,coop$Month)
+  
+# Creating unique instances of both year/month and just year  
+unique <- unique(coop$YM)
+
+unqiue_year<- unique(coop$Year)
+
+
+coop.data <- suppressMessages(
+  purrr::map(
+    coop,
+    ~readr::read_csv(.) %>%
+      dplyr::select(Lat, Lon) %>%
+      dplyr::filter(!is.na(Lat))) %>%
+  magrittr::set_names(basename(Sys.glob(
+    paste0(system.file('T:/Oyster Project/mels_git/coop/Coop_Data/csv', package='leaflet.extras'),
+           'coop')))))
+
+leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron)
+
+
+purrr::walk(
+  unique(fdacs$Year),
+  function(year) {
+    leaf <<- leaf %>%
+      addHeatmap(
+        data = fdacs[[year]],
+        layerId = year, group =year,
+        lng=~Lon, lat=~Lat,
+        blur = 20, max = 0.05, radius = 15)
+  })
+
+
+leaf %>%
+  setView(-83.10, 29.25, 14) %>%
+  addLayersControl(
+    baseGroups = names(unqiue_year),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+
+
+```
+
+
+
+
+
+
+
