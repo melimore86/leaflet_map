@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>markers.kml</name>
+	<StyleMap id="msn_square">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_square0</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_square0</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="s_ylw-pushpin0">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<fill>0</fill>
+		</PolyStyle>
+	</Style>
+	<Style id="sn_square">
+		<IconStyle>
+			<scale>0.6</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/square.png</href>
+			</Icon>
+		</IconStyle>
+		<LabelStyle>
+			<scale>0.8</scale>
+		</LabelStyle>
+	</Style>
+	<StyleMap id="msn_square0">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_square</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_square</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="s_ylw-pushpin_hl4">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<fill>0</fill>
+		</PolyStyle>
+	</Style>
+	<Style id="sn_square0">
+		<IconStyle>
+			<scale>1.2</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/square.png</href>
+			</Icon>
+		</IconStyle>
+	</Style>
+	<Style id="sh_square">
+		<IconStyle>
+			<scale>0.7</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/square.png</href>
+			</Icon>
+		</IconStyle>
+		<LabelStyle>
+			<scale>0.8</scale>
+		</LabelStyle>
+	</Style>
+	<StyleMap id="m_ylw-pushpin02">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin0</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl4</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sh_square0">
+		<IconStyle>
+			<scale>1.4</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/shapes/square.png</href>
+			</Icon>
+		</IconStyle>
+	</Style>
+	<Folder>
+		<name>Channel markers</name>
+		<Placemark>
+			<name>LCO5 29°15&apos;26.743&quot;N  83° 6&apos;27.842&quot;W</name>
+			<LookAt>
+				<gx:TimeStamp><when>2012-01-19</when>
+</gx:TimeStamp>
+				<gx:ViewerOptions>
+					<gx:option name="historicalimagery"></gx:option>
+					<gx:option enabled="0" name="sunlight"></gx:option>
+					<gx:option enabled="0" name="streetview"></gx:option>
+				</gx:ViewerOptions>
+				<longitude>-83.10824647136882</longitude>
+				<latitude>29.25783913355629</latitude>
+				<altitude>0</altitude>
+				<heading>-0.02447461771566909</heading>
+				<tilt>26.98389785793786</tilt>
+				<range>879.8273623244755</range>
+				<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_square0</styleUrl>
+			<Point>
+				<gx:drawOrder>1</gx:drawOrder>
+				<coordinates>-83.10773333333333,29.25742777777778,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>RE 15 29°14&apos;51.860&quot;N  83° 6&apos;1.573&quot;W</name>
+			<LookAt>
+				<gx:TimeStamp><when>2012-01-19</when>
+</gx:TimeStamp>
+				<gx:ViewerOptions>
+					<gx:option name="historicalimagery"></gx:option>
+					<gx:option enabled="0" name="sunlight"></gx:option>
+					<gx:option enabled="0" name="streetview"></gx:option>
+				</gx:ViewerOptions>
+				<longitude>-83.10140604254494</longitude>
+				<latitude>29.24788554226189</latitude>
+				<altitude>0</altitude>
+				<heading>-0.02057587350291277</heading>
+				<tilt>30.00331014735157</tilt>
+				<range>736.9705957452103</range>
+				<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_square</styleUrl>
+			<Point>
+				<gx:drawOrder>1</gx:drawOrder>
+				<coordinates>-83.10043611111111,29.24773888888889,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>RE 21 29°13&apos;47.671&quot;N  83° 5&apos;27.874&quot;W</name>
+			<LookAt>
+				<gx:TimeStamp><when>2012-01-19</when>
+</gx:TimeStamp>
+				<gx:ViewerOptions>
+					<gx:option name="historicalimagery"></gx:option>
+					<gx:option enabled="0" name="sunlight"></gx:option>
+					<gx:option enabled="0" name="streetview"></gx:option>
+				</gx:ViewerOptions>
+				<longitude>-83.09388406743705</longitude>
+				<latitude>29.23137160288579</latitude>
+				<altitude>0</altitude>
+				<heading>3.050041579532147</heading>
+				<tilt>22.19283520049014</tilt>
+				<range>2373.3611411615</range>
+				<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_square</styleUrl>
+			<Point>
+				<gx:drawOrder>1</gx:drawOrder>
+				<coordinates>-83.09107499999999,29.22990833333333,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>Deep cut 29°14&apos;33.191&quot;N  83° 5&apos;53.756&quot;W</name>
+			<LookAt>
+				<gx:TimeStamp><when>2012-01-19</when>
+</gx:TimeStamp>
+				<gx:ViewerOptions>
+					<gx:option name="historicalimagery"></gx:option>
+					<gx:option enabled="0" name="sunlight"></gx:option>
+					<gx:option enabled="0" name="streetview"></gx:option>
+				</gx:ViewerOptions>
+				<longitude>-83.09854223344719</longitude>
+				<latitude>29.24319978572114</latitude>
+				<altitude>0</altitude>
+				<heading>3.047099592584637</heading>
+				<tilt>29.63085600749993</tilt>
+				<range>540.20357055912</range>
+				<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_square</styleUrl>
+			<Point>
+				<gx:drawOrder>1</gx:drawOrder>
+				<coordinates>-83.09826388888888,29.24255277777778,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>LCO4  29°15&apos;35.349&quot;N  83° 6&apos;36.765&quot;W</name>
+			<LookAt>
+				<gx:TimeStamp><when>2014-01-22</when>
+</gx:TimeStamp>
+				<gx:ViewerOptions>
+					<gx:option name="historicalimagery"></gx:option>
+					<gx:option enabled="0" name="sunlight"></gx:option>
+					<gx:option enabled="0" name="streetview"></gx:option>
+				</gx:ViewerOptions>
+				<longitude>-83.10966063056972</longitude>
+				<latitude>29.25962678015391</latitude>
+				<altitude>0</altitude>
+				<heading>3.043309607416614</heading>
+				<tilt>15.38510660938205</tilt>
+				<range>1807.087763664467</range>
+				<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_square0</styleUrl>
+			<Point>
+				<gx:drawOrder>1</gx:drawOrder>
+				<coordinates>-83.1102111111111,29.25981944444445,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>Tarpon cut  29°15&apos;41.440&quot;N   83° 6&apos;44.831&quot;W</name>
+			<LookAt>
+				<gx:TimeStamp><when>2012-01-19</when>
+</gx:TimeStamp>
+				<gx:ViewerOptions>
+					<gx:option name="historicalimagery"></gx:option>
+					<gx:option enabled="0" name="sunlight"></gx:option>
+					<gx:option enabled="0" name="streetview"></gx:option>
+				</gx:ViewerOptions>
+				<longitude>-83.11209695857568</longitude>
+				<latitude>29.26148611045715</latitude>
+				<altitude>0</altitude>
+				<heading>3.040270846975296</heading>
+				<tilt>29.03612495800507</tilt>
+				<range>421.4058726476244</range>
+				<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
+			</LookAt>
+			<styleUrl>#msn_square0</styleUrl>
+			<Point>
+				<gx:drawOrder>1</gx:drawOrder>
+				<coordinates>-83.11245277777778,29.26151111111111,0</coordinates>
+			</Point>
+		</Placemark>
+		<Placemark>
+			<name>Untitled Polygon</name>
+			<visibility>0</visibility>
+			<styleUrl>#m_ylw-pushpin02</styleUrl>
+			<Polygon>
+				<tessellate>1</tessellate>
+				<outerBoundaryIs>
+					<LinearRing>
+						<coordinates>
+							-83.11511595272633,29.27702680442625,0 -83.12757714680025,29.26903184049801,0 -83.11380065124656,29.2604434205163,0 -83.10527420243997,29.26791281864065,0 -83.1050764928025,29.27362690830098,0 -83.1116182445533,29.27708247632118,0 -83.11511595272633,29.27702680442625,0 
+						</coordinates>
+					</LinearRing>
+				</outerBoundaryIs>
+			</Polygon>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>
