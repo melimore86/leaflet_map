@@ -15,36 +15,39 @@ library("rgdal")
 library("leaflet.extras")
 library("maptools")
 library("leaflet")
-library("plotKML")
 library("rgdal")
 library("dplyr")
 library("tidyr")
 ```
 
 ```{r r_uploads,include= FALSE}
-library(rgdal)
-setwd("C:/Users/Mel/Desktop/leaflet_map/leaflet_map")
+#setwd("C:/Users/Mel/Desktop/leaflet_map/leaflet_map")
 
-coords = getKMLcoordinates('markers.kml')
-coords2<- as.data.frame(coords)
+#coords = getKMLcoordinates('markers.kml')
+#coords2<- as.data.frame(coords)
 
 
-x <- c(coords2$X1,coords2$X1.1,coords2$X1.2,coords2$X1.3,coords2$X1.4,coords2$X1.5,coords2$X1.6)
-y <-c (coords2$X2,coords2$X2.1,coords2$X2.2,coords2$X2.3,coords2$X2.4,coords2$X2.5,coords2$X2.6)
+#x <- c(coords2$X1,coords2$X1.1,coords2$X1.2,coords2$X1.3,coords2$X1.4,coords2$X1.5,coords2$X1.6)
+#y <-c (coords2$X2,coords2$X2.1,coords2$X2.2,coords2$X2.3,coords2$X2.4,coords2$X2.5,coords2$X2.6)
 
-df<- cbind (x,y)
-colnames(df)<- c("X", "Y")
+#df<- cbind (x,y)
+#colnames(df)<- c("X", "Y")
 
 PRO <- sp::CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0')
-df2 <- SpatialPoints(df, CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0'))
+#df2 <- SpatialPoints(df, CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0'))
 
-propreef <- readOGR(dsn=path.expand("C:/Users/Mel/Desktop/leaflet_map/leaflet_map/lc_project.gdb"), layer = "lc_reef_elements")
+propreef <- readOGR(dsn=path.expand("C:/Users/melimore86/Desktop/leaflet_map/lc_project.gdb"), layer = "lc_reef_elements")
 propreef2<- sp::spTransform(propreef,PRO)
 
+markers <- readOGR(dsn=path.expand("C:/Users/melimore86/Desktop/leaflet_map/shapefile"), layer = "markers_df")
+markers2<- sp::spTransform(markers,PRO)
+
 signs<- makeIcon(
-  iconUrl = "C:/Users/Mel/Desktop/leaflet_map/leaflet_map/icon/signs3.png",
+  iconUrl = "C:/Users/melimore86/Desktop/leaflet_map/icon/signs3.png",
   iconWidth = 30, iconHeight = 30)
 
+
+class(markers2)
 ```
 
 ```{r r_map, include=FALSE}
@@ -53,7 +56,8 @@ prop<-leaflet() %>% setView(-83.10, 29.25, zoom=14) %>% addProviderTiles("Esri.W
 addProviderTiles("OpenStreetMap.HOT", group = "OpenStreetMap.HOT")%>% 
   addProviderTiles("Esri.NatGeoWorldMap", group = "Esri.NatGeoWorldMap") %>%
   addPolygons(data = propreef2,stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5, group= "Proposed Reef", color="white", weight=10, label = paste("Element ID - ", propreef2$element_id), labelOptions = labelOptions(noHide = F, direction= "right"))%>%
-  addMarkers(df2, lng= df2$X, lat= df2$Y, group="Markers",icon=signs, label ="Channel Marker")%>%
+  addMarkers(data = markers2, group= "Markers", label = "Channel Markers", labelOptions = labelOptions(noHide = F, direction= "right"),icon=signs)%>%
+  #addMarkers(df2, lng= df2$X, lat= df2$Y, group="Markers",icon=signs, label ="Channel Marker")%>%
   addLayersControl(baseGroups = c("Esri WorldImagery","OpenStreetMap.HOT","Esri.NatGeoWorldMap"), overlayGroups = c("Proposed Reef", "Markers"), options = layersControlOptions(collapsed = TRUE))
 
 ```
