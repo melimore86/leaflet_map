@@ -21,17 +21,22 @@ library("tidyr")
 ```
 
 ```{r r_uploads,include= FALSE}
-#setwd("C:/Users/Mel/Desktop/leaflet_map/leaflet_map")
 
-#coords = getKMLcoordinates('markers.kml')
-#coords2<- as.data.frame(coords)
+oysterbeds1982<- readOGR(dsn= path.expand("C:/Users/melimore86/Desktop/leaflet_map/shapefile"), layer="LC_1982")
 
+oysterbeds1995<- readOGR(dsn= path.expand("C:/Users/melimore86/Desktop/leaflet_map/shapefile"), layer="LC_1995")
 
-#x <- c(coords2$X1,coords2$X1.1,coords2$X1.2,coords2$X1.3,coords2$X1.4,coords2$X1.5,coords2$X1.6)
-#y <-c (coords2$X2,coords2$X2.1,coords2$X2.2,coords2$X2.3,coords2$X2.4,coords2$X2.5,coords2$X2.6)
+oysterbeds2001<- readOGR(dsn= path.expand("C:/Users/melimore86/Desktop/leaflet_map/shapefile"), layer="LC_2001")
 
-#df<- cbind (x,y)
-#colnames(df)<- c("X", "Y")
+oysterbeds2010<- readOGR(dsn= path.expand("C:/Users/melimore86/Desktop/leaflet_map/shapefile"), layer="LC_2010")
+
+PRO <- sp::CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0')
+
+oysterbeds1982p <- sp::spTransform(oysterbeds1982,PRO)
+oysterbeds1995p <- sp::spTransform(oysterbeds1995,PRO)
+oysterbeds2001p <- sp::spTransform(oysterbeds2001,PRO)
+oysterbeds2010p <- sp::spTransform(oysterbeds2010,PRO)
+
 
 PRO <- sp::CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0')
 #df2 <- SpatialPoints(df, CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0'))
@@ -56,9 +61,14 @@ prop<-leaflet() %>% setView(-83.10, 29.25, zoom=14) %>% addProviderTiles("Esri.W
 addProviderTiles("OpenStreetMap.HOT", group = "OpenStreetMap.HOT")%>% 
   addProviderTiles("Esri.NatGeoWorldMap", group = "Esri.NatGeoWorldMap") %>%
   addPolygons(data = propreef2,stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5, group= "Proposed Reef", color="white", weight=10, label = paste("Element ID - ", propreef2$element_id), labelOptions = labelOptions(noHide = F, direction= "right"))%>%
+  addPolygons(data = oysterbeds1982p,stroke = FALSE, fillOpacity = .8, smoothFactor = 0.5, group= "1982 oyster distribution", color= "#33FF00")%>%
+  addPolygons(data = oysterbeds1995p,stroke = FALSE, fillOpacity = 0.8, smoothFactor = 0.5, group= "1995 oyster distribution", color= "#3399FF")%>%
+  addPolygons(data = oysterbeds2001p,stroke = FALSE, fillOpacity = 0.6, smoothFactor = 0.5, group= "2001 oyster distribution", color= "#9900FF")%>%
+   addPolygons(data = oysterbeds2010p,stroke = FALSE, fillOpacity = 0.6, smoothFactor = 0.5, group= "2010 oyster distribution", color= "#FF33CC")%>%
   addMarkers(data = markers2, group= "Markers", label = "Channel Markers", labelOptions = labelOptions(noHide = F, direction= "right"),icon=signs)%>%
   #addMarkers(df2, lng= df2$X, lat= df2$Y, group="Markers",icon=signs, label ="Channel Marker")%>%
-  addLayersControl(baseGroups = c("Esri WorldImagery","OpenStreetMap.HOT","Esri.NatGeoWorldMap"), overlayGroups = c("Proposed Reef", "Markers"), options = layersControlOptions(collapsed = TRUE))
+  addLayersControl(baseGroups = c("Esri WorldImagery","OpenStreetMap.HOT","Esri.NatGeoWorldMap"), overlayGroups = c("Proposed Reef", "Markers", "1982 oyster distribution","1995 oyster distribution","2001 oyster distribution","2010 oyster distribution"), options = layersControlOptions(collapsed = TRUE))%>% 
+  hideGroup(c("2010 oyster distribution","2001 oyster distribution","1995 oyster distribution","1982 oyster distribution"))
 
 ```
 
