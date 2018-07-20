@@ -8,7 +8,6 @@ library(scales)
 library(lubridate)
 library(plotly)
 
-setwd("C:/Users/melimore86/Desktop")
 
 labresults <- read.csv("cedarkeylabresults.csv", header= TRUE)
 
