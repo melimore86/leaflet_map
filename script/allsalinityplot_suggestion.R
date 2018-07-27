@@ -35,6 +35,18 @@ sal_temp <- expand(wq, Site, Date=d) %>%
   select(Site, Date, Salinity, Temperature)
 sal_temp$d2 <- date(sal_temp$Date)
 
+dsal <- seq(startDate, endDate, by = "hour")
+sal_only <- expand(wq, Site, Date=dsal) %>%
+  left_join(wq, by=c("Site" = "Site", "Date" = "Date")) %>%
+  select(Site, Date, Salinity)
+sal_only$dsal2 <- date(sal_only$Date)
+
+dtemp <- seq(startDate, endDate, by = "hour")
+temp_only <- expand(wq, Site, Date=dtemp) %>%
+  left_join(wq, by=c("Site" = "Site", "Date" = "Date")) %>%
+  select(Site, Date, Temperature)
+temp_only$dtemp2 <- date(temp_only$Date)
+
 # Calculate mean, min and max daily Sal and Temp
 # Note: tidyr's gather is in use here, by converting the "wide" table to
 # "long" one, we can use the aes(color=Measure) in ggplot
@@ -44,6 +56,24 @@ sal_temp$d2 <- date(sal_temp$Date)
 sal_temp_summ <- sal_temp %>%
   gather(key = "Measure", value = "Value", Salinity, Temperature) %>%
   group_by(Site, d2, Measure) %>%
+  summarise(meanVal = dailyMean(Value, 0.75), 
+            minVal = dailyMin(Value, 0.75), 
+            maxVal = dailyMax(Value, 0.75)) %>%
+  ungroup()
+
+
+sal_summ <- sal_only %>%
+  gather(key = "Measure", value = "Value", Salinity) %>%
+  group_by(Site, dsal2, Measure) %>%
+  summarise(meanVal = dailyMean(Value, 0.75), 
+            minVal = dailyMin(Value, 0.75), 
+            maxVal = dailyMax(Value, 0.75)) %>%
+  ungroup()
+
+
+temp_summ <- temp_only %>%
+  gather(key = "Measure", value = "Value", Temperature) %>%
+  group_by(Site, dtemp2, Measure) %>%
   summarise(meanVal = dailyMean(Value, 0.75), 
             minVal = dailyMin(Value, 0.75), 
             maxVal = dailyMax(Value, 0.75)) %>%
@@ -60,14 +90,14 @@ dis2 <- dis %>%
 # Second step is to specify the scaling of x and y axes, by using the breaks argument
 # we can control what to display on the y main and secondary axes, e.g. 0 to 40 for main,
 # and 0 to 20000 for secondary
-ggplot() +
+tempplot<- ggplot() +
   geom_ribbon(data=dis2, aes(x=dates, ymax=val/1000 - 20, ymin=-20), fill="#56B4E9",
               alpha=0.6) +
-  geom_line(data=sal_temp_summ, aes(x=d2, y=meanVal, color=Measure), size= 1.1) +
-  geom_ribbon(data=sal_temp_summ, aes(x=d2, ymax=maxVal, ymin=minVal, fill=Measure), 
+  geom_line(data=temp_summ, aes(x=dtemp2, y=meanVal, color=Measure), size= 1.1) +
+  geom_ribbon(data=temp_summ, aes(x=dtemp2, ymax=maxVal, ymin=minVal, fill=Measure), 
               alpha=0.4) +
   xlab("Date") +
-  scale_y_continuous(name = "Temperature (C) & Salinity (ppt)", 
+  scale_y_continuous(name = "Temperature (C)", 
                      limits=c(-20,40), 
                      breaks = seq(0, 40, 10),
                      sec.axis = sec_axis(~(.+20), 
@@ -75,9 +105,9 @@ ggplot() +
                                          breaks = seq(0, 20, 10))) +
   scale_x_date(date_breaks = "2 month", date_labels = "%Y/%m", expand = c(0, 0)) +
   
-  scale_fill_manual(values = c("#0072B2","#D55E00")) +
+  scale_fill_manual(values = c("#D55E00")) +
   
-  scale_color_manual(values = c("#0072B2","#D55E00")) +
+  scale_color_manual(values = c("#D55E00")) +
   
   theme(legend.position=("top"),
         panel.grid.major = element_blank(),
@@ -89,5 +119,44 @@ ggplot() +
         axis.text.x = element_text(angle = 90, hjust = 1),
         legend.title=element_blank()) +
   facet_wrap(~ Site)
+
+tempplot
+
+#salplot<- 
+  ggplot() +
+  geom_ribbon(data=dis2, aes(x=dates, ymax=val/1000 - 20, ymin=-20, group="Discharge"), fill="#56B4E9",
+              alpha=0.4) +
+  geom_line(data=sal_summ, aes(x=dsal2, y=meanVal, color=Measure), size= 1.1) +
+  geom_ribbon(data=sal_summ, aes(x=dsal2, ymax=maxVal, ymin=minVal, fill=Measure), 
+              alpha=0.6) +
+  xlab("Date") +
+  scale_y_continuous(name = "Salinity (ppt)", 
+                     limits=c(-20,40), 
+                     breaks = seq(0, 40, 10),
+                     sec.axis = sec_axis(~(.+20), 
+                                         name = "River Discharge (1,000 cfs)",
+                                         breaks = seq(0, 20, 10))) +
+  scale_x_date(date_breaks = "2 month", date_labels = "%Y/%m", expand = c(0, 0)) +
+  
+  scale_fill_manual(values = c("#0072B2")) +
+  
+  scale_color_manual(values = c("#0072B2")) +
+  
+  theme(legend.position=("top"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(color = "black", size = 1, fill = NA, linetype="solid"),
+        axis.text=element_text(size=10),
+        axis.title=element_text(size=13,face="bold"),
+        plot.title =element_text(size=13, face='bold'),
+        axis.text.x = element_text(angle = 90, hjust = 1),
+        legend.title=element_blank()) +
+  facet_wrap(~ Site)
+
+salplot
+
+
+
+
 
 
