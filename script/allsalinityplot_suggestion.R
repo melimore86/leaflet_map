@@ -1,6 +1,8 @@
 library("tidyverse")
 library("lubridate")
 library("waterData")
+library("dplyr")
+library("ggplot2")
 
 source("script/dailyFunctions.R")
 
@@ -13,7 +15,7 @@ wq$Site <- factor(wq$Site, levels = c("6", "1", "7", "5", "2", "8","4", "3", "9"
 # Water discharge carpentry (dynamically updating local discharge file)
 station = '02323500' 
 stinfo  = siteInfo(station)
-dis <- read_rds("rmd/data/dis.rds")
+dis <- read_rds("data/dis.rds")
 if (max(dis$dates) < (Sys.Date() - 5)) {
   sdate <- max(dis$dates) + 1
   newdis <- importDVs(staid = station, code = '00060', stat = '00003', 
@@ -63,6 +65,7 @@ sal_temp_summ <- sal_temp %>%
 
 
 sal_summ <- sal_only %>%
+  filter(Site %in% c("6","5","4"))%>%
   gather(key = "Measure", value = "Value", Salinity) %>%
   group_by(Site, dsal2, Measure) %>%
   summarise(meanVal = dailyMean(Value, 0.75), 
@@ -72,6 +75,7 @@ sal_summ <- sal_only %>%
 
 
 temp_summ <- temp_only %>%
+  filter(Site %in% c("6","5","4"))%>%
   gather(key = "Measure", value = "Value", Temperature) %>%
   group_by(Site, dtemp2, Measure) %>%
   summarise(meanVal = dailyMean(Value, 0.75), 
@@ -90,18 +94,22 @@ dis2 <- dis %>%
 # Second step is to specify the scaling of x and y axes, by using the breaks argument
 # we can control what to display on the y main and secondary axes, e.g. 0 to 40 for main,
 # and 0 to 20000 for secondary
-tempplot<- ggplot() +
-  geom_ribbon(data=dis2, aes(x=dates, ymax=val/1000 - 20, ymin=-20), fill="#56B4E9",
-              alpha=0.6) +
+#tempplot<- 
+
+  ggplot() +
   geom_line(data=temp_summ, aes(x=dtemp2, y=meanVal, color=Measure), size= 1.1) +
   geom_ribbon(data=temp_summ, aes(x=dtemp2, ymax=maxVal, ymin=minVal, fill=Measure), 
               alpha=0.4) +
+    geom_ribbon(data=dis2, aes(x=dates, ymax=val/1000 - 20, ymin=-20, group= "River Discharge"), fill="#56B4E9",
+                alpha=0.6) +
   xlab("Date") +
-  scale_y_continuous(name = "Temperature (C)", 
+  scale_y_continuous(name = "Temperature (C)
+                       ", 
                      limits=c(-20,40), 
                      breaks = seq(0, 40, 10),
                      sec.axis = sec_axis(~(.+20), 
-                                         name = "River Discharge (1,000 cfs)",
+                                         name = "River Discharge (1,000 cfs)
+                                           ",
                                          breaks = seq(0, 20, 10))) +
   scale_x_date(date_breaks = "2 month", date_labels = "%Y/%m", expand = c(0, 0)) +
   
@@ -116,13 +124,14 @@ tempplot<- ggplot() +
         axis.text=element_text(size=10),
         axis.title=element_text(size=13,face="bold"),
         plot.title =element_text(size=13, face='bold'),
-        axis.text.x = element_text(angle = 90, hjust = 1),
+        axis.text.x = element_text(angle = 90, hjust = 1, face= "bold"),
+        axis.text.y = element_text(face= "bold"),
         legend.title=element_blank()) +
-  facet_wrap(~ Site)
+  facet_wrap(~ Site, ncol=1)
 
-tempplot
 
-#salplot<- 
+
+
   ggplot() +
   geom_ribbon(data=dis2, aes(x=dates, ymax=val/1000 - 20, ymin=-20, group="Discharge"), fill="#56B4E9",
               alpha=0.4) +
@@ -151,9 +160,10 @@ tempplot
         plot.title =element_text(size=13, face='bold'),
         axis.text.x = element_text(angle = 90, hjust = 1),
         legend.title=element_blank()) +
-  facet_wrap(~ Site)
+  facet_wrap(~ Site, ncol=1)
 
-salplot
+
+
 
 
 
