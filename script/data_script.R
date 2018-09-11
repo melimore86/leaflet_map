@@ -54,7 +54,7 @@ wq<-wq %>%
 
 
 #Writting as a .csv for the Shiny App
-write.csv(wq,file = "data/wq.csv")
+write.csv(wq,file = "rmd/data/wq.csv")
 
 
 ###Lakewatch Data, from the MySQL workbench
@@ -77,7 +77,7 @@ lab$Sensor_Type[lab$Sensor_Type == "4"] <- "LAKEWATCH"
 lab$Sensor_Type[lab$Sensor_Type == "5"] <- "YSI"
 
 #Writting as a .csv for the Shiny App
-write.csv(lab, file = "data/lab.csv")
+write.csv(lab, file = "rmd/data/lab.csv")
 
 
 
