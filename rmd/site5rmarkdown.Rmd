@@ -31,7 +31,6 @@ There are discrete measurements for this site.  All discrete measurements were p
 This figure is available for zoomability.            
 
 
-
 ```{r r_site, include= FALSE}
 ##### Site 1 Analysis with Diver sensor
 
@@ -61,26 +60,16 @@ windcomb<- rbind(winddatatable17,winddatatable18)
 
 
 ```{r labresults, include=FALSE, eval=TRUE}
-lab <- read.csv("data/discrete_measurement.csv", header= T)
-
-colnames(lab) <- c("Site", "Date", "Time_org", "Time_UTC", "Sun_code", "Phosphorus", "Nitrogen", "Chlorophyll", "Secchi", "Color", "DO", "Temperature","Conductivity", "Salinity", "Depth", "Sensor_Type")
+lab <- read.csv("data/lab.csv", header= T)
 
 lab$Secchi<- (lab$Secchi/ 3.28)
-
-lab<- lab %>%
-  filter(Sensor_Type == "lakewatch")
 
 lab$Date <- as.POSIXct(as.Date(lab$Date,origin= "1899-12-30"))
 
 lab<-lab %>% 
-  filter((Site == 5))%>%
-  select(Site, Date, Phosphorus, Nitrogen, Chlorophyll, Secchi, Color, Conductivity)
+  filter((Site == 5 & Sensor_Type == "LAKEWATCH"))%>%
+  select(Site, Date, Phosphorus, Nitrogen, Chlorophyll, Secchi, Color, Conductivity, Sensor_Type)
 
-keycol <- "Variable"
-valuecol <- "Measurement"
-gathercols <- c("Phosphorus", "Nitrogen", "Chlorophyll", "Secchi", "Color", "Conductivity")
-
-lab2<-gather_(lab, keycol, valuecol, gathercols)
 
 ```
 
@@ -128,7 +117,7 @@ phos <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+ 
+      as.POSIXct("2018-07-30")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -146,7 +135,7 @@ nitro <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+ 
+      as.POSIXct("2018-07-30")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -164,7 +153,7 @@ ggplot(data= lab, aes(x= Date)) +
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+ 
+      as.POSIXct("2018-07-30")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -183,7 +172,7 @@ secchi <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+ 
+      as.POSIXct("2018-07-30")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -201,7 +190,7 @@ color <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+
+      as.POSIXct("2018-07-30")))+
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -219,7 +208,7 @@ cond <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+ 
+      as.POSIXct("2018-07-30")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -241,7 +230,7 @@ var <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-07-30"))) +
+      as.POSIXct("2018-09-05"))) +
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=12,face="bold"),
         axis.text.x = element_text(size=8))

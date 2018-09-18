@@ -72,6 +72,7 @@ lab<-lab %>%
   filter((Site == 2 & Sensor_Type == "LAKEWATCH"))%>%
   select(Site, Date, Phosphorus, Nitrogen, Chlorophyll, Secchi, Color, Conductivity, Sensor_Type)
 
+
 ```
 
 ```{r dis, warning= FALSE,  message=FALSE, results="hide" , include=FALSE}
@@ -118,7 +119,7 @@ phos <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+ 
+      as.POSIXct("2018-07-30")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -136,7 +137,7 @@ nitro <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+ 
+      as.POSIXct("2018-07-30")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -154,7 +155,7 @@ ggplot(data= lab, aes(x= Date)) +
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+ 
+      as.POSIXct("2018-07-30")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -173,7 +174,7 @@ secchi <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+ 
+      as.POSIXct("2018-07-30")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -191,7 +192,7 @@ color <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+
+      as.POSIXct("2018-07-30")))+
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -209,7 +210,7 @@ cond <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-04-30")))+ 
+      as.POSIXct("2018-07-30")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
