@@ -76,12 +76,12 @@ wqplot<-ggplot(data=wq, aes(x=Date))+
     geom_point(aes(y= Salinity, fill= "Salinity"),color= "black")+
   scale_y_continuous(sec.axis = sec_axis(~.*1000, name = "River Discharge (cfs)"), limits=c(0,40)) + 
   scale_x_datetime(
-    breaks = date_breaks("4 weeks") ,
+    breaks = date_breaks("8 weeks") ,
     labels = date_format("%Y/%m"),
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-07-30"))) +
+      as.POSIXct("2018-09-21"))) +
   scale_fill_manual(values = c("cornflowerblue", "black", "red"),guide = guide_legend(show = TRUE)) +
   theme(legend.position=("top"),
     panel.border = element_rect(color = "black", size = 1, fill = NA, linetype="solid"),

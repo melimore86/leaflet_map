@@ -120,7 +120,7 @@ var <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-09-05"))) +
+      as.POSIXct("2018-09-21"))) +
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=12,face="bold"),
         axis.text.x = element_text(size=8))

@@ -27,14 +27,12 @@ Only Sites 1-6 have discrete measurements.
 
 ```{r dataresults, include=FALSE, eval=TRUE}
 
-lab <- read.csv("data/discrete_measurement.csv", header= T)
-
-colnames(lab) <- c("Site", "Date", "Time_org", "Time_UTC", "Sun_code", "Phosphorus", "Nitrogen", "Chlorophyll", "Secchi", "Color", "DO", "Temperature","Conductivity", "Salinity", "Depth", "Sensor_Type")
+lab <- read.csv("data/lab.csv", header= T)
 
 lab$Secchi<- (lab$Secchi/ 3.28)
 
 lab<- lab %>%
-  filter(Sensor_Type == "lakewatch")
+  filter(Sensor_Type == "LAKEWATCH")
 
 lab$Date <- as.POSIXct(as.Date(lab$Date,origin= "1899-12-30"))
 
@@ -85,7 +83,7 @@ ggplot(data= lab, aes(x= Date)) +
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-05-30"))) +
+      as.POSIXct("2018-07-30"))) +
   theme_bw()+
   theme(legend.position=("top"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
@@ -111,7 +109,7 @@ ggplot(data= lab, aes(x= Date)) +
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-05-30")))+
+      as.POSIXct("2018-07-30")))+
   theme_bw()+
   theme(legend.position=("top"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
@@ -137,7 +135,7 @@ ggplot(data= lab, aes(x= Date)) +
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-05-30"))) +
+      as.POSIXct("2018-07-30"))) +
   theme_bw()+
   theme(legend.position=("top"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
@@ -163,7 +161,7 @@ ggplot(data= lab, aes(x= Date)) +
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-05-30"))) +
+      as.POSIXct("2018-07-30"))) +
   theme_bw()+
   theme(legend.position=("top"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
@@ -189,7 +187,7 @@ ggplot(data= lab, aes(x= Date)) +
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-05-30"))) +
+      as.POSIXct("2018-07-30"))) +
   theme_bw()+
   theme(legend.position=("top"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
@@ -215,7 +213,7 @@ ggplot(data= lab, aes(x= Date)) +
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-05-30"))) +
+      as.POSIXct("2018-07-30"))) +
   theme_bw()+
   theme(legend.position=("top"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
