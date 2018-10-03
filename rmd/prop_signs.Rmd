@@ -1,0 +1,72 @@
+---
+output:
+  html_document:
+    fig_width: 10
+    fig_height: 8
+---
+  
+```{r r_packages, include=FALSE}
+library("leaflet")
+library("htmlwidgets")
+library("maptools")
+library("sf")
+library("sp")
+library("rgdal")
+library("leaflet.extras")
+library("maptools")
+library("leaflet")
+library("rgdal")
+library("dplyr")
+library("tidyr")
+```
+
+```{r r_uploads,include= FALSE}
+ 
+PRO <- sp::CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0')
+
+propreef <- readOGR(dsn=path.expand("C:/Users/melimore86/Desktop/leaflet_map/shapefile/lc_project.gdb"), layer = "lc_reef_elements")
+
+propreef2<- sp::spTransform(propreef,PRO)
+
+
+markers <- read.csv("C:/Users/melimore86/Desktop/leaflet_map/rmd/data/makers.csv", header= TRUE)
+
+x<- (markers$POINT_X)
+y<- (markers$POINT_Y)
+
+df <- cbind(x,y )
+
+colnames(df)<- c("X", "Y")
+
+df2 <- sp::SpatialPointsDataFrame(df,PRO)
+
+signs<- makeIcon(
+  iconUrl = "C:/Users/melimore86/Desktop/leaflet_map/icon/signs3.png",
+  iconWidth = 30, iconHeight = 30)
+
+```
+
+```{r r_map, include=FALSE}
+
+prop<-leaflet() %>% setView(-83.10, 29.25, zoom=14) %>% 
+  
+  addProviderTiles("Esri.WorldImagery", group = "Esri WorldImagery")  %>%
+  
+  addProviderTiles("OpenStreetMap.HOT", group = "OpenStreetMap.HOT")%>% 
+  
+  addProviderTiles("Esri.NatGeoWorldMap", group = "Esri.NatGeoWorldMap") %>%
+  
+  addPolygons(data = propreef2,stroke = FALSE, fillOpacity = 1, smoothFactor = 0.5, group= "Proposed Reef", color="white", weight=10, label = paste("Element ID - ", propreef2$element_id), labelOptions = labelOptions(noHide = F, direction= "right"))%>%
+  
+  addMarkers(data = df2,~long, ~lat,icon=signs)%>%
+  
+  addLayersControl(baseGroups = c("Esri WorldImagery","OpenStreetMap.HOT","Esri.NatGeoWorldMap"), overlayGroups = c("Proposed Reef", "Markers"), options = layersControlOptions(collapsed = TRUE))
+```
+
+```{r intermap, echo=FALSE}
+prop
+saveWidget(prop, file="prop.html")
+```
+
+
+
