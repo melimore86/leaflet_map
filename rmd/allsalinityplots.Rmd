@@ -81,14 +81,15 @@ wqplot<-ggplot(data=wq, aes(x=Date))+
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-09-21"))) +
+      as.POSIXct("2018-10-04"))) +
   scale_fill_manual(values = c("cornflowerblue", "black", "red"),guide = guide_legend(show = TRUE)) +
   theme(legend.position=("top"),
     panel.border = element_rect(color = "black", size = 1, fill = NA, linetype="solid"),
         axis.text=element_text(size=20),
         axis.title=element_text(size=20,face="bold"),
         plot.title =element_text(size=30, face='bold'),
-        axis.text.x = element_text(angle = 90, hjust = 1)) +
+        axis.text.x = element_text(angle = 90, hjust = 1),
+    strip.text = element_text(size = 20)) +
     facet_wrap(~facet)
 ```
 
