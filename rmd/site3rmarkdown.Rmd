@@ -119,7 +119,7 @@ phos <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-07-30")))+ 
+      as.POSIXct("2018-09-15")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -137,7 +137,7 @@ nitro <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-07-30")))+ 
+      as.POSIXct("2018-09-15")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -155,7 +155,7 @@ ggplot(data= lab, aes(x= Date)) +
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-07-30")))+ 
+      as.POSIXct("2018-09-15")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -174,7 +174,7 @@ secchi <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-07-30")))+ 
+      as.POSIXct("2018-09-15")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -185,14 +185,14 @@ color <-
   labs(x= "Date", y= "Color(Pt-Co Units)") +
   geom_line(data= dis, aes(y=Discharge/160), color= "cornflowerblue", size=1) +
   geom_point(aes(y=Color),color= "black", size=3) +
-  scale_y_continuous(sec.axis = sec_axis(~.*160,name = "River Discharge (cfs)"),limits=c(0,125)) +
+  scale_y_continuous(sec.axis = sec_axis(~.*160,name = "River Discharge (cfs)"),limits=c(0,160)) +
   scale_x_datetime(
     breaks = date_breaks("8 weeks") ,
     labels = date_format("%y/%m"),
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-07-30")))+
+      as.POSIXct("2018-09-15")))+
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -210,7 +210,7 @@ cond <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2016-12-25"),
-      as.POSIXct("2018-07-30")))+ 
+      as.POSIXct("2018-09-15")))+ 
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=8,face="bold"),
         axis.text.x = element_text(size=6))
@@ -232,7 +232,7 @@ var <-
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-10-04"))) +
+      as.POSIXct("2018-10-20"))) +
   theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
         axis.title=element_text(size=12,face="bold"),
         axis.text.x = element_text(size=8))

@@ -81,7 +81,7 @@ wqplot<-ggplot(data=wq, aes(x=Date))+
     expand = c(0, 0),
     limits = c(
       as.POSIXct("2017-08-10"),
-      as.POSIXct("2018-10-04"))) +
+      as.POSIXct("2018-10-20"))) +
   scale_fill_manual(values = c("cornflowerblue", "black", "red"),guide = guide_legend(show = TRUE)) +
   theme(legend.position=("top"),
     panel.border = element_rect(color = "black", size = 1, fill = NA, linetype="solid"),
